@@ -422,7 +422,7 @@ end
 
 function Atr_InitScanDB()
 
-	local realm_Faction = GetRealmName().."_"..UnitFactionGroup ("player");
+	local realm_Faction = GetRealmName();
 
 	if (AUCTIONATOR_PRICE_DATABASE and AUCTIONATOR_PRICE_DATABASE["__dbversion"] == nil) then	-- see if we need to migrate
 	
@@ -683,6 +683,13 @@ end
 
 
 -----------------------------------------
+function Atr_REsearch_Toggle()
+   if (Atr_RESearch) then
+        Atr_RESearch = false;
+    else
+        Atr_RESearch = true;
+    end
+end 
 
 function Atr_GetSellItemInfo ()
 
@@ -702,16 +709,18 @@ function Atr_GetSellItemInfo ()
 		local exact = true
 		name, auctionItemLink = AtrScanningTooltip:GetItem();
 
-		for i=1,AtrScanningTooltip:NumLines() do 
-			local text = getglobal("AtrScanningTooltipTextLeft" .. i)
-			text = text:GetText()
-			text = string.match(text, "(Equip: [^-]+)-")
-			if text and text ~= "" then 
-				-- RE: is used for checking bag count
-				text = text:gsub("Equip: ", "RE:")
-				-- trim
-				auctionItemName = text:gsub("^%s*(.-)%s*$", "%1")
-				exact = false
+		if (Atr_RESearch == true) then
+			for i=1,AtrScanningTooltip:NumLines() do 
+				local text = getglobal("AtrScanningTooltipTextLeft" .. i)
+				text = text:GetText()
+				text = string.match(text, "(Equip: [^-]+)-")
+				if text and text ~= "" then 
+					-- RE: is used for checking bag count
+					text = text:gsub("Equip: ", "RE:")
+					-- trim
+					auctionItemName = text:gsub("^%s*(.-)%s*$", "%1")
+					exact = false
+				end
 			end
 		end
 
