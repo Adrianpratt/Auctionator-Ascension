@@ -708,20 +708,11 @@ function Atr_GetSellItemInfo ()
 		local name;
 		local exact = true
 		name, auctionItemLink = AtrScanningTooltip:GetItem();
-
-		if (Atr_RESearch == true) then
-			for i=1,AtrScanningTooltip:NumLines() do 
-				local text = getglobal("AtrScanningTooltipTextLeft" .. i)
-				text = text:GetText()
-				text = string.match(text, "(Equip: [^-]+)-")
-				if text and text ~= "" then 
-					-- RE: is used for checking bag count
-					text = text:gsub("Equip: ", "RE:")
-					-- trim
-					auctionItemName = text:gsub("^%s*(.-)%s*$", "%1")
-					exact = false
-				end
-			end
+		--Swap auction name to search for re on the item
+		if (Atr_RESearch == true) and ReName ~= nil then
+			auctionItemName = "RE:" .. AscensionUI.REList[ReName].spellName;
+			exact = false;
+			ReName = nil;
 		end
 
 		if (auctionItemLink == nil) then
@@ -1046,7 +1037,12 @@ local function Atr_LoadContainerItemToSellPane()
 	end
 
 	PickupContainerItem(bagID, slotID);
-
+	--Get MysticEnchant from alt left clicking item
+	if GetREInSlot(bagID, slotID) ~= nil then
+		ReName = GetREInSlot(bagID, slotID);
+	else
+		ReName = nil;
+	end
 	local infoType = GetCursorInfo()
 
 	if (infoType == "item") then
@@ -3597,6 +3593,15 @@ end
 
 function Atr_Duration_OnShow(self)
 	UIDropDownMenu_Initialize (self, Atr_Duration_Initialize);
+		--Hook Container ID to get MysticEnchant from item
+		hooksecurefunc("ContainerFrameItemButton_OnClick",function(self,button)
+			local bagID,slotID=self:GetParent():GetID(),self:GetID();
+			if GetREInSlot(bagID, slotID) ~= nil then
+				ReName = GetREInSlot(bagID, slotID);
+			else
+				ReName = nil;
+			end
+		end);
 end
 
 -----------------------------------------
